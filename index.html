@@ -211,6 +211,11 @@ li.done .chk{background:var(--accent);border-color:var(--accent)}
 .meta-k .bar i.over{background:var(--warn)}
 .meta-k small{color:var(--muted);font-size:13px}
 .gasto-list .ent{color:var(--good);font-weight:600}
+.sono-card{grid-column:1/-1}
+.sono-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sono-h{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);min-width:0}
+.sono-h input{width:100%;min-width:0;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:6px 8px;font:600 15px var(--f-body);font-variant-numeric:tabular-nums}
+.sono-t{font:800 20px var(--f-display);font-variant-numeric:tabular-nums}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
 @media (max-width:420px){.agenda li{grid-template-columns:82px 1fr 30px;gap:8px}.grid2{grid-template-columns:1fr 1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -254,8 +259,8 @@ li.done .chk{background:var(--accent);border-color:var(--accent)}
     <section class="block" id="log">
       <div class="sec-h"><h3>Registro do dia</h3><span id="saved"></span></div>
       <div class="grid2">
-        <div class="field card"><label for="f-peso">Peso</label><div class="big-num"><input id="f-peso" type="number" step="0.1" inputmode="decimal" placeholder="—"><em>kg</em></div></div>
-        <div class="field card"><label for="f-sono">Sono</label><div class="big-num"><input id="f-sono" type="number" step="0.5" inputmode="decimal" placeholder="—"><em>horas</em></div></div>
+        <div class="field card sono-card"><label for="f-peso">Peso</label><div class="big-num"><input id="f-peso" type="number" step="0.1" inputmode="decimal" placeholder="—"><em>kg</em></div></div>
+        <div class="field card sono-card"><div class="meal-top"><span class="lbl">Sono</span><b class="sono-t" id="f-sono-t">—</b></div><div class="sono-row"><div class="sono-h"><label for="f-dormi">Dormi</label><input id="f-dormi" type="time"></div><div class="sono-h"><label for="f-acordei">Acordei</label><input id="f-acordei" type="time"></div></div></div>
       </div>
       <div class="stack">
         <div class="field card" id="leitura-card">
@@ -399,6 +404,7 @@ const parse=s=>{const[y,m,d]=s.split("-").map(Number);return new Date(y,m-1,d)};
 const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
 const mins=t=>{const[h,m]=t.split(":").map(Number);return h*60+m};
 const monday=d=>addDays(d,-((d.getDay()+6)%7));
+const fmtH=h=>{const m=Math.round(h*60);return Math.floor(m/60)+"h"+(m%60?pad(m%60):"")};
 const fmtT=t=>t.replace(":00","h").replace(":","h");
 const eur=n=>"€ "+n.toFixed(2).replace(".",",");
 const clone=o=>JSON.parse(JSON.stringify(o||{}));
@@ -437,7 +443,7 @@ function renderHoje(fromSnapshot){
   const focused=$("log").contains(document.activeElement);
   if(fromSnapshot&&focused) return;
   const set=(id,v)=>{const el=$(id); if(el!==document.activeElement) el.value=v??""};
-  set("f-peso",data.peso); set("f-sono",data.sono); set("f-leitura",data.leitura); set("l-pag",data.pagina); set("l-com",data.comentario); set("f-treino",data.treino); set("f-nota",data.nota); set("f-simulado",data.simulado);
+  set("f-peso",data.peso); set("f-dormi",data.dormir); set("f-acordei",data.acordar); $("f-sono-t").textContent=data.sono!=null&&data.sono!==""?fmtH(+data.sono)+" de sono":"—"; set("f-leitura",data.leitura); set("l-pag",data.pagina); set("l-com",data.comentario); set("f-treino",data.treino); set("f-nota",data.nota); set("f-simulado",data.simulado);
   $("f-humor").innerHTML=HUMOR.map((h,i)=>`<button class="chip" data-v="${i+1}" aria-pressed="${data.humor===i+1}">${h}</button>`).join("");
   $("f-energia").innerHTML=ENERGIA.map((h,i)=>`<button class="chip" data-v="${i+1}" aria-pressed="${data.energia===i+1}">${h}</button>`).join("");
   $("f-fome").innerHTML=FOME.map((h,i)=>`<button class="chip" data-v="${i+1}" aria-pressed="${data.fome===i+1}">${h}</button>`).join("");
@@ -735,14 +741,14 @@ function renderHoro(){
 
 /* ---------- SEMANA ---------- */
 function weekStats(startId){
-  const start=parse(startId); let s={trab:0,pilates:0,movDias:0,auto:0,ingles:0,casa:0,cuid:0,sono8:0,pesos:[],gastos:0,entradas:0,humor:[],treinos:0,kcal:[],agua8:0,doces:0,docesEur:0,leitura:0,leituraDias:0};
+  const start=parse(startId); let s={trab:0,pilates:0,movDias:0,auto:0,ingles:0,casa:0,cuid:0,sono8:0,pesos:[],gastos:0,entradas:0,dormir:[],acordar:[],humor:[],treinos:0,kcal:[],agua8:0,doces:0,docesEur:0,leitura:0,leituraDias:0};
   for(let i=0;i<7;i++){
     const d=addDays(start,i), id=ymd(d), data=state.days[id]||{}, ch=data.checks||{}; let mov=false;
     ROTINA[d.getDay()].forEach(b=>{ if(!ch[b[0]])return; const m=mins(b[1])-mins(b[0]);
       if(b[3]==="trabalho")s.trab+=m; if(b[3]==="pilates"){s.pilates++;mov=true} if(b[3]==="treino"||b[3]==="mov")mov=true;
       if(b[3]==="autoescola")s.auto++; if(b[3]==="ingles")s.ingles++; if(b[3]==="casa")s.casa+=m; if(b[3]==="autocuidado")s.cuid+=m; });
     if(mov)s.movDias++;
-    if(+data.sono>=8)s.sono8++;
+    if(+data.sono>=8)s.sono8++; if(data.dormir)s.dormir.push(data.dormir); if(data.acordar)s.acordar.push(data.acordar);
     if(data.peso)s.pesos.push(+data.peso);
     (data.gastos||[]).forEach(g=>{if(g.entrada){s.entradas+=g.valor;return} s.gastos+=g.valor; if(g.docinho){s.doces++;s.docesEur+=g.valor}});
     if(+data.leitura>0)s.leitura+=+data.leitura; if(leu(data))s.leituraDias++;
@@ -752,6 +758,7 @@ function weekStats(startId){
   }
   return s;
 }
+function horaMedia(a,noite){if(!a.length)return "—";const v=a.map(t=>{let m=mins(t);if(noite&&m<720)m+=1440;return m});let m=Math.round(avg(v))%1440;return pad(Math.floor(m/60))+":"+pad(m%60)}
 const avg=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
 function renderPatente(){
   const hoje=new Date(); hoje.setHours(0,0,0,0);
@@ -824,6 +831,7 @@ function renderSemana(){
   let diff=""; if(pa!=null&&pp!=null){const dd=pa-pp; diff=(dd>0?"+":"")+dd.toFixed(1).replace(".",",")+" kg vs semana anterior"}
   $("resumo").innerHTML=[
     ["Peso médio",pa!=null?pa.toFixed(1).replace(".",",")+" kg":"—",diff||(s.pesos.length?s.pesos.length+" registros":"sem registros")],
+    ["Horário de sono",horaMedia(s.dormir,true)+" → "+horaMedia(s.acordar,false),s.dormir.length?"média de dormir e acordar · meta 23h → 7h":"anote dormi e acordei"],
     ["Dinheiro",(s.entradas-s.gastos>=0?"+ ":"− ")+eur(Math.abs(s.entradas-s.gastos)),"entrou "+eur(s.entradas)+" · saiu "+eur(s.gastos)],
     ["Humor médio",ha!=null?HUMOR[Math.round(ha)-1]:"—",s.humor.length?s.humor.length+" dias registrados":"sem registros"],
     ["Treinos anotados",String(s.treinos),"dias com nota de treino"],
@@ -889,7 +897,11 @@ $("agenda").addEventListener("click",e=>{
 });
 const bindText=(id,field,num)=>$(id).addEventListener("input",e=>{const d=dayData(state.day); const v=e.target.value;
   if(v==="") delete d[field]; else d[field]=num?parseFloat(v):v; queue("days",state.day,800)});
-bindText("f-peso","peso",true); $("f-peso").addEventListener("input",()=>setTimeout(renderMetaKcal,0)); bindText("f-sono","sono",true); bindText("f-leitura","leitura",true); bindText("l-pag","pagina",true); bindText("l-com","comentario"); $("l-pag").addEventListener("input",()=>setTimeout(renderLivro,0)); bindText("f-treino","treino"); bindText("f-nota","nota"); bindText("f-simulado","simulado",true);
+bindText("f-peso","peso",true); $("f-peso").addEventListener("input",()=>setTimeout(renderMetaKcal,0)); function calcSono(){const d=dayData(state.day), a=$("f-dormi").value, b=$("f-acordei").value;
+  if(a)d.dormir=a; else delete d.dormir; if(b)d.acordar=b; else delete d.acordar;
+  if(a&&b){let m=mins(b)-mins(a); if(m<=0)m+=1440; d.sono=Math.round(m/60*10)/10} else if(a||b) delete d.sono;
+  $("f-sono-t").textContent=d.sono!=null?fmtH(d.sono)+" de sono":"—"; queue("days",state.day,600);}
+$("f-dormi").addEventListener("change",calcSono); $("f-acordei").addEventListener("change",calcSono); bindText("f-leitura","leitura",true); bindText("l-pag","pagina",true); bindText("l-com","comentario"); $("l-pag").addEventListener("input",()=>setTimeout(renderLivro,0)); bindText("f-treino","treino"); bindText("f-nota","nota"); bindText("f-simulado","simulado",true);
 $("f-humor").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=dayData(state.day),v=+b.dataset.v; if(d.humor===v)delete d.humor; else d.humor=v; queue("days",state.day,300); renderHoje()});
 ["energia","fome"].forEach(k=>$("f-"+k).addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=dayData(state.day),v=+b.dataset.v; if(d[k]===v)delete d[k]; else d[k]=v; queue("days",state.day,300); renderHoje()}));
 $("f-mens").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=dayData(state.day),v=b.dataset.v; if(d.menstruacao===v)delete d.menstruacao; else d.menstruacao=v; queue("days",state.day,300); renderHoje()});
