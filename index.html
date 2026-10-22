@@ -180,6 +180,22 @@ li.done .chk{background:var(--accent);border-color:var(--accent)}
 .banner{background:var(--accent-soft);border-radius:12px;padding:10px 12px;font-size:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:10px}
 .backup{padding:16px;display:flex;flex-direction:column;gap:10px}
 .backup p{margin:0;font-size:14px;color:var(--muted);max-width:60ch}
+.tablebox{overflow-x:auto}
+.tablebox table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px;font-variant-numeric:tabular-nums}
+.tablebox th,.tablebox td{padding:9px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.tablebox th:first-child,.tablebox td:first-child{text-align:left;position:sticky;left:0;background:var(--surface)}
+.tablebox thead th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.tablebox tr.hoje td{color:var(--accent);font-weight:700}
+.tablebox tfoot td{font-weight:800;border-bottom:0}
+.tablebox td.vazio{color:var(--rotina)}
+.tablebox td.bom{color:var(--good)}
+.tablebox td.alerta{color:var(--warn)}
+.sinais{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:2px 0}
+.sinal{background:var(--bg);border-radius:10px;padding:8px 10px;font-size:13px;min-width:0}
+.sinal b{display:block;font-size:14px}
+.sinal span{color:var(--muted)}
+.dicas{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;max-width:60ch}
+.nota{font-size:12px;color:var(--muted);margin:0}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
 @media (max-width:420px){.agenda li{grid-template-columns:82px 1fr 30px;gap:8px}.grid2{grid-template-columns:1fr 1fr}.grid2 .field:last-child{grid-column:1/-1}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -209,6 +225,11 @@ li.done .chk{background:var(--accent);border-color:var(--accent)}
       <button class="iconbtn" id="d-next" aria-label="Próximo dia">›</button>
     </div>
     <div style="text-align:center"><button class="linkbtn" id="d-today" hidden>Voltar para hoje</button></div>
+
+    <section class="block">
+      <div class="sec-h"><h3>Como vou me sentir</h3><span>previsão do dia</span></div>
+      <div class="card patente" id="sentir"></div>
+    </section>
 
     <section class="block">
       <div class="sec-h"><h3>Agenda</h3><span id="ag-count"></span></div>
@@ -267,6 +288,14 @@ li.done .chk{background:var(--accent);border-color:var(--accent)}
     <section class="block">
       <div class="sec-h"><h3>Metas semanais</h3><span id="w-score"></span></div>
       <ul class="metas card" id="metas"></ul>
+    </section>
+    <section class="block">
+      <div class="sec-h"><h3>Planilha da semana</h3><button class="mini" id="csv">Exportar planilha</button></div>
+      <div class="card tablebox" id="planilha"></div>
+    </section>
+    <section class="block">
+      <div class="sec-h"><h3>Meta de leitura</h3><span>sugestão</span></div>
+      <div class="card patente" id="leitura-meta"></div>
     </section>
     <section class="block">
       <div class="sec-h"><h3>Resumo</h3></div>
@@ -385,6 +414,7 @@ function renderHoje(fromSnapshot){
   renderMeals();
   renderAgua();
   renderHoro();
+  renderSentir();
 }
 const FOODS=[
 ["arroz-b","Arroz branco, cozido",128,"TACO","1 colher de servir",45],
@@ -525,6 +555,51 @@ const CANCER=[
 "Boa fase para resolver saúde. Que tal ligar hoje para marcar o raio-x ou os óculos?",
 "Comemore uma vitória pequena de hoje. Você está construindo uma rotina com limites e espaço para viver."
 ];
+/* ---------- como vou me sentir ---------- */
+function cicloInfo(diaId){
+  const fluxo=id=>{const m=(state.days[id]||{}).menstruacao;return m&&m!=="Não"};
+  const ids=Object.keys(state.days).filter(id=>id<=diaId&&fluxo(id)).sort();
+  const inicios=ids.filter(id=>!fluxo(ymd(addDays(parse(id),-1))));
+  if(!inicios.length)return null;
+  let dur=28; if(inicios.length>=2){const ds=[];for(let i=1;i<inicios.length;i++){const g=Math.round((parse(inicios[i])-parse(inicios[i-1]))/864e5);if(g>=20&&g<=40)ds.push(g)} if(ds.length)dur=Math.round(avg(ds))}
+  const dia=Math.round((parse(diaId)-parse(inicios[inicios.length-1]))/864e5)+1;
+  if(dia>dur+10)return {dia,dur,fase:"atraso"};
+  const ov=dur-14;
+  let fase; if(dia<=5)fase="menstrual"; else if(dia<ov-1)fase="folicular"; else if(dia<=ov+1)fase="ovulatória"; else if(dia>=dur-5)fase="pré-menstrual"; else fase="lútea";
+  return {dia,dur,fase,proxima:Math.max(0,dur-dia+1)};
+}
+function renderSentir(){
+  const id=state.day, d=parse(id), x=state.days[id]||{}, ontem=state.days[ymd(addDays(d,-1))]||{};
+  let pts=0; const dicas=[];
+  // rotina do dia
+  const blocos=ROTINA[d.getDay()], ocup=blocos.filter(b=>!["livre","pausa","rotina"].includes(b[3])).reduce((a,b)=>a+mins(b[1])-mins(b[0]),0);
+  const carga=ocup>=540?"pesada":ocup>=300?"média":"leve";
+  if(carga==="pesada"){pts--;dicas.push("Dia cheio: proteja o almoço e a pausa, e não acrescente compromissos novos.")}
+  if(carga==="leve"){pts++;dicas.push("Dia mais leve: bom para resolver uma pendência, como marcar o raio-x ou os óculos.")}
+  // sono
+  const sono=x.sono!=null&&x.sono!==""?+x.sono:(ontem.sono!=null&&ontem.sono!==""?+ontem.sono:null);
+  if(sono!=null){if(sono<6.5){pts--;dicas.push("Você dormiu pouco: vá com calma no treino e tente dormir às 23h hoje.")}else if(sono>=8)pts++}
+  // humor recente
+  const hs=[1,2,3].map(i=>(state.days[ymd(addDays(d,-i))]||{}).humor).filter(Boolean), hm=avg(hs);
+  if(hm!=null){if(hm<=2){pts--;dicas.push("Os últimos dias foram pesados: reserve um tempinho de autocuidado, mesmo que curto.")}else if(hm>=4)pts++}
+  // ciclo
+  const c=cicloInfo(id); let cicloTxt;
+  if(!c)cicloTxt="sem dados";
+  else if(c.fase==="atraso")cicloTxt=`dia ${c.dia} (passou da média)`;
+  else{cicloTxt=`dia ${c.dia} · ${c.fase}`;
+    if(c.fase==="menstrual"){pts--;dicas.push("Fase menstrual: é comum ter menos energia. Prefira treino leve, pilates ou caminhada, e beba bastante água.")}
+    if(c.fase==="folicular"){pts++;dicas.push("Fase folicular: costuma ser boa para começar coisas novas e estudar conteúdo difícil.")}
+    if(c.fase==="ovulatória"){pts++;dicas.push("Perto da ovulação a energia e a vontade de conversar costumam estar em alta. Bom dia para reuniões e treino mais forte.")}
+    if(c.fase==="pré-menstrual"){pts--;dicas.push(`Fase pré-menstrual (${c.proxima<=1?"a menstruação deve vir hoje ou amanhã":"menstruação em cerca de "+c.proxima+" dias"}): a vontade de doce costuma aumentar. Deixe uma fruta à mão antes de passar na padaria.`)}}
+  const nivel=pts>=2?"Boa":pts<=-2?"Baixa":"Média";
+  const frase={Boa:"Tudo indica um dia com boa energia.",Média:"Um dia de energia equilibrada: vá no seu ritmo.",Baixa:"Tudo indica um dia de energia mais baixa. Seja gentil com você."}[nivel];
+  const horo=CANCER[Math.floor((d-new Date(d.getFullYear(),0,1))/864e5)%CANCER.length];
+  $("sentir").innerHTML=`<span class="fase">Energia ${nivel.toLowerCase()}</span><p><b>${frase}</b></p>
+  <div class="sinais"><div class="sinal"><span>Rotina</span><b>${carga}</b></div><div class="sinal"><span>Sono</span><b>${sono!=null?String(sono).replace(".",",")+"h":"não anotado"}</b></div><div class="sinal"><span>Humor recente</span><b>${hm!=null?HUMOR[Math.round(hm)-1]:"sem dados"}</b></div><div class="sinal"><span>Ciclo</span><b>${cicloTxt}</b></div></div>
+  ${dicas.length?`<ul class="dicas">${dicas.slice(0,3).map(t=>`<li>${t}</li>`).join("")}</ul>`:""}
+  <p><b>Câncer ♋:</b> ${horo}</p>
+  <p class="nota">${!c?"Marque a menstruação nos dias em que ela vier para o app calcular a fase do ciclo. ":""}A previsão usa os seus próprios registros e fica mais certeira com o tempo. As fases do ciclo são tendências comuns, não regra, e o horóscopo é só para inspirar.</p>`;
+}
 function renderHoro(){
   const d=parse(state.day), n=Math.floor((d-new Date(d.getFullYear(),0,1))/864e5);
   $("horo-text").textContent=CANCER[n%CANCER.length];
@@ -562,8 +637,41 @@ function renderPatente(){
   const ult=sims.length?sims[sims.length-1]:null;
   $("patente").innerHTML=`<span class="fase">${fase}</span><div><span class="big">${dias}</span> dias até 31 de dezembro</div><p>${dica}</p><p><b>Simulados:</b> ${sims.length?`${sims.length} ${sims.length===1?"feito":"feitos"} · último com ${ult} erros · ${seq} de 5 seguidos com até 3 erros`:"nenhum registrado ainda. Anote os erros no campo “Simulado da patente” do dia."}</p>`;
 }
+function weekRows(startId){
+  const st=parse(startId);
+  return Array.from({length:7},(_,i)=>{const d=addDays(st,i),id=ymd(d),x=state.days[id]||{},g=(x.gastos||[]);
+    return {d,id,sono:x.sono!=null&&x.sono!==""?+x.sono:null,peso:x.peso?+x.peso:null,gastos:g.reduce((a,y)=>a+y.valor,0),doces:g.filter(y=>y.docinho).reduce((a,y)=>a+y.valor,0),leitura:+x.leitura||0,agua:x.agua||0,kcal:dayKcal(x)}});
+}
+function leituraSugestao(){
+  const st=parse(state.week); let mins=0,dias=0;
+  for(let i=1;i<=14;i++){const x=state.days[ymd(addDays(st,-i))]||{}; if(+x.leitura>0){mins+=+x.leitura;dias++}}
+  let atual=Math.round(mins/14), meta, txt;
+  if(dias===0){meta=10;txt="Você ainda não registrou leitura nas últimas 2 semanas. Comece pequeno: 10 minutos por dia, logo depois de acordar."}
+  else{meta=Math.max(10,Math.ceil(atual*1.15/5)*5); if(meta===atual)meta+=5;
+    txt=`Nas últimas 2 semanas você leu em ${dias} de 14 dias, uma média de ${atual} min por dia. A sugestão é subir um pouco, sem pular etapas.`}
+  if(dias>=12&&atual>=30){meta=atual;txt=`Você leu em ${dias} de 14 dias, com média de ${atual} min por dia. Ótimo ritmo: a meta é manter.`}
+  return {meta,txt,semana:meta*7};
+}
+function renderPlanilha(){
+  const R=weekRows(state.week), hojeId=ymd(new Date()), f1=v=>v==null?"—":v.toFixed(1).replace(".",","), e=v=>v?eur(v):"—";
+  const sonos=R.filter(r=>r.sono!=null).map(r=>r.sono), pesos=R.filter(r=>r.peso).map(r=>r.peso), kc=R.filter(r=>r.kcal>0).map(r=>r.kcal);
+  const meta=leituraSugestao().meta;
+  $("planilha").innerHTML=`<table><thead><tr><th>Dia</th><th>Sono</th><th>Peso</th><th>Gastos</th><th>Docinhos</th><th>Leitura</th><th>Água</th><th>Kcal</th></tr></thead><tbody>${R.map(r=>`<tr class="${r.id===hojeId?"hoje":""}"><td>${DIAS[r.d.getDay()].slice(0,3)} ${r.d.getDate()}</td><td class="${r.sono==null?"vazio":r.sono>=8?"bom":r.sono<6.5?"alerta":""}">${r.sono==null?"—":f1(r.sono)+"h"}</td><td class="${r.peso?"":"vazio"}">${r.peso?f1(r.peso):"—"}</td><td class="${r.gastos?"":"vazio"}">${e(r.gastos)}</td><td class="${r.doces?"alerta":"vazio"}">${e(r.doces)}</td><td class="${!r.leitura?"vazio":r.leitura>=meta?"bom":""}">${r.leitura?r.leitura+" min":"—"}</td><td class="${!r.agua?"vazio":r.agua>=8?"bom":""}">${r.agua?r.agua+"/8":"—"}</td><td class="${r.kcal?"":"vazio"}">${r.kcal?r.kcal.toLocaleString("pt-BR"):"—"}</td></tr>`).join("")}</tbody>
+  <tfoot><tr><td>Semana</td><td>${sonos.length?"média "+f1(avg(sonos))+"h":"—"}</td><td>${pesos.length?"média "+f1(avg(pesos)):"—"}</td><td>${eur(R.reduce((a,r)=>a+r.gastos,0))}</td><td>${eur(R.reduce((a,r)=>a+r.doces,0))}</td><td>${R.reduce((a,r)=>a+r.leitura,0)} min</td><td>${R.reduce((a,r)=>a+r.agua,0)} copos</td><td>${kc.length?"média "+Math.round(avg(kc)).toLocaleString("pt-BR"):"—"}</td></tr></tfoot></table>`;
+  const L=leituraSugestao(), lidos=R.reduce((a,r)=>a+r.leitura,0);
+  $("leitura-meta").innerHTML=`<span class="fase">Esta semana</span><div><span class="big">${L.meta}</span> min por dia</div><p>${L.txt}</p><p><b>Progresso:</b> ${lidos} de ${L.semana} min na semana.</p><div class="bar"><i style="width:${Math.min(100,Math.round(lidos/L.semana*100))}%"></i></div>`;
+}
+function exportCSV(){
+  const R=weekRows(state.week), n=v=>v==null?"":String(v).replace(".",",");
+  const linhas=[["Data","Dia","Sono (h)","Peso (kg)","Gastos (€)","Docinhos (€)","Leitura (min)","Água (copos)","Calorias (kcal)"].join(";")]
+    .concat(R.map(r=>[r.id,DIAS[r.d.getDay()],n(r.sono),n(r.peso),n(r.gastos.toFixed(2)),n(r.doces.toFixed(2)),r.leitura,r.agua,r.kcal].join(";")));
+  const blob=new Blob(["\ufeff"+linhas.join("\n")],{type:"text/csv"}), nome=`semana-${state.week}.csv`, file=new File([blob],nome,{type:"text/csv"});
+  (async()=>{try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"Planilha da semana"});return}}catch(e){if(e&&e.name==="AbortError")return}
+    const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();a.remove();toast("Planilha salva em Downloads.")})();
+}
 function renderSemana(){
   renderPatente();
+  renderPlanilha();
   const st=parse(state.week), en=addDays(st,6);
   $("w-title").innerHTML="Semana<small>"+st.getDate()+" "+MESES[st.getMonth()]+" – "+en.getDate()+" "+MESES[en.getMonth()]+"</small>";
   const s=weekStats(state.week);
@@ -577,7 +685,8 @@ function renderSemana(){
     ["Casa organizada",s.casa,180,h(s.casa)+" de 3h"],
     ["Autocuidado",s.cuid,120,h(s.cuid)+" de 2h"],
     ["Noites com 8h de sono",s.sono8,7,s.sono8+" de 7 noites"],
-    ["Dias com 2 L de água",s.agua8,7,s.agua8+" de 7 dias"]];
+    ["Dias com 2 L de água",s.agua8,7,s.agua8+" de 7 dias"],
+    ["Leitura",s.leitura,leituraSugestao().semana,s.leitura+" de "+leituraSugestao().semana+" min"]];
   let ok=0;
   $("metas").innerHTML=metas.map(m=>{const p=Math.min(100,Math.round(m[1]/m[2]*100)); if(p>=100)ok++;
     return `<li class="${p>=100?"ok":""}"><span>${m[0]}</span><span class="v">${m[3]}</span><div class="bar"><i style="width:${p}%"></i></div></li>`}).join("");
@@ -769,6 +878,7 @@ async function saveBackup(){
   const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();a.remove();renderBackupInfo();toast("Cópia salva em Downloads.");
 }
 $("bk-save").onclick=saveBackup;
+$("csv").onclick=exportCSV;
 $("bk-load").onclick=()=>{$("bk-file").value="";$("bk-file").click()};
 $("bk-file").addEventListener("change",async e=>{
   const f=e.target.files&&e.target.files[0]; if(!f)return;
