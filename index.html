@@ -81,7 +81,7 @@ li.done .chk{background:var(--accent);border-color:var(--accent)}
 .now-tag{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.08em}
 
 /* log */
-.grid2{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.grid2{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .field{padding:12px 14px;display:flex;flex-direction:column;gap:6px;min-width:0}
 .field label,.lbl{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 .field input[type=number],.field input[type=text],.field textarea,.field select,.ideia-add input,.ideia-add select{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:9px 10px;font:500 15px var(--f-body)}
@@ -181,7 +181,7 @@ li.done .chk{background:var(--accent);border-color:var(--accent)}
 .backup{padding:16px;display:flex;flex-direction:column;gap:10px}
 .backup p{margin:0;font-size:14px;color:var(--muted);max-width:60ch}
 .tablebox{overflow-x:auto}
-.tablebox table{border-collapse:collapse;width:100%;min-width:520px;font-size:14px;font-variant-numeric:tabular-nums}
+.tablebox table{border-collapse:collapse;width:100%;min-width:600px;font-size:14px;font-variant-numeric:tabular-nums}
 .tablebox th,.tablebox td{padding:9px 8px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
 .tablebox th:first-child,.tablebox td:first-child{text-align:left;position:sticky;left:0;background:var(--surface)}
 .tablebox thead th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700}
@@ -196,8 +196,23 @@ li.done .chk{background:var(--accent);border-color:var(--accent)}
 .sinal span{color:var(--muted)}
 .dicas{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px;max-width:60ch}
 .nota{font-size:12px;color:var(--muted);margin:0}
+.ptab{overflow-x:auto}
+.ptab table{border-collapse:collapse;width:100%;min-width:480px;font-size:13px;font-variant-numeric:tabular-nums}
+.ptab th,.ptab td{padding:7px 6px;text-align:center;border-bottom:1px solid var(--line);white-space:nowrap}
+.ptab th:first-child,.ptab td:first-child{text-align:left;position:sticky;left:0;background:var(--surface)}
+.ptab thead th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.ptab tr.atual td{background:var(--accent-soft)}
+.up{color:var(--warn);font-weight:700}.down{color:var(--casa);font-weight:700}.na{color:var(--rotina)}
+.livro{background:var(--bg);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:6px}
+.livro b{font-size:15px}
+.livro small{color:var(--muted)}
+.lidos{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px;font-size:14px}
+.meta-k{display:flex;flex-direction:column;gap:6px;margin:4px 0}
+.meta-k .bar i.over{background:var(--warn)}
+.meta-k small{color:var(--muted);font-size:13px}
+.gasto-list .ent{color:var(--good);font-weight:600}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:999px;font-size:14px;z-index:20;max-width:calc(100% - 32px)}
-@media (max-width:420px){.agenda li{grid-template-columns:82px 1fr 30px;gap:8px}.grid2{grid-template-columns:1fr 1fr}.grid2 .field:last-child{grid-column:1/-1}}
+@media (max-width:420px){.agenda li{grid-template-columns:82px 1fr 30px;gap:8px}.grid2{grid-template-columns:1fr 1fr}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -241,14 +256,23 @@ li.done .chk{background:var(--accent);border-color:var(--accent)}
       <div class="grid2">
         <div class="field card"><label for="f-peso">Peso</label><div class="big-num"><input id="f-peso" type="number" step="0.1" inputmode="decimal" placeholder="—"><em>kg</em></div></div>
         <div class="field card"><label for="f-sono">Sono</label><div class="big-num"><input id="f-sono" type="number" step="0.5" inputmode="decimal" placeholder="—"><em>horas</em></div></div>
-        <div class="field card"><label for="f-leitura">Leitura</label><div class="big-num"><input id="f-leitura" type="number" step="5" inputmode="numeric" placeholder="—"><em>min</em></div></div>
       </div>
       <div class="stack">
+        <div class="field card" id="leitura-card">
+          <div class="meal-top"><span class="lbl">Leitura</span><button class="chip" id="l-check" aria-pressed="false">Li hoje</button></div>
+          <div id="l-livro"></div>
+          <div class="grid2"><div><label class="lbl" for="l-pag">Parei na página</label><input id="l-pag" type="number" inputmode="numeric" placeholder="—"></div><div><label class="lbl" for="f-leitura">Minutos</label><input id="f-leitura" type="number" step="5" inputmode="numeric" placeholder="—"></div></div>
+          <label class="lbl" for="l-com">Comentário</label><textarea id="l-com" placeholder="Uma frase, uma ideia ou o que achou do trecho de hoje."></textarea>
+          <p class="nota">Pode preencher tudo ou só tocar em “Li hoje”.</p>
+        </div>
         <div class="field card"><span class="lbl">Humor</span><div class="chips" id="f-humor"></div></div>
+        <div class="field card"><span class="lbl">Energia</span><div class="chips" id="f-energia"></div></div>
+        <div class="field card"><span class="lbl">Fome</span><div class="chips" id="f-fome"></div></div>
         <div class="field card"><span class="lbl">Menstruação</span><div class="chips" id="f-mens"></div></div>
         <div class="field card"><label for="f-treino">Como treinei</label><textarea id="f-treino" placeholder="Ex.: pilates, senti as costas leves. Ou: não treinei porque…"></textarea></div>
         <div class="field card">
           <div class="meal-top"><span class="lbl">O que comi</span><b class="kday" id="k-dia">0 kcal</b></div>
+          <div class="meta-k" id="meta-k"></div>
           <div id="meals"></div>
           <p class="fonte">Calorias = gramas × valor por 100 g. Fontes: tabela TACO (Unicamp) e USDA para alimentos comuns; Open Food Facts para produtos com código de barras; e os alimentos que você mesma criar a partir do rótulo.</p>
         </div>
@@ -260,9 +284,10 @@ li.done .chk{background:var(--accent);border-color:var(--accent)}
         <input type="file" id="foto-cod" accept="image/*" capture="environment" hidden>
         <div class="field card"><label for="f-simulado">Simulado da patente</label><div class="big-num"><input id="f-simulado" type="number" min="0" max="30" inputmode="numeric" placeholder="—"><em>erros de 30</em></div></div>
         <div class="field card">
-          <span class="lbl">Gastos</span>
+          <span class="lbl">Dinheiro</span>
+          <div class="chips"><button class="chip" id="g-saida" aria-pressed="true">Saída</button><button class="chip" id="g-entrada" aria-pressed="false">Entrada</button></div>
           <div class="gasto-row"><input id="g-valor" type="number" step="0.01" inputmode="decimal" placeholder="€ 0,00" aria-label="Valor"><input id="g-desc" type="text" placeholder="Com o quê?" aria-label="Descrição"><button class="btn" id="g-add">Somar</button></div>
-          <div class="chips"><button class="chip" id="g-doce" aria-pressed="false">É docinho</button></div>
+          <div class="chips" id="g-doce-row"><button class="chip" id="g-doce" aria-pressed="false">É docinho</button></div>
           <ul class="gasto-list" id="g-list"></ul>
         </div>
         <div class="field card"><label for="f-nota">O que funcionou e o que não</label><textarea id="f-nota" placeholder="Uma ou duas linhas sobre o dia."></textarea></div>
@@ -288,6 +313,10 @@ li.done .chk{background:var(--accent);border-color:var(--accent)}
     <section class="block">
       <div class="sec-h"><h3>Metas semanais</h3><span id="w-score"></span></div>
       <ul class="metas card" id="metas"></ul>
+    </section>
+    <section class="block">
+      <div class="sec-h"><h3>Meus padrões</h3><span>aprendidos com você</span></div>
+      <div class="card patente" id="padroes"></div>
     </section>
     <section class="block">
       <div class="sec-h"><h3>Planilha da semana</h3><button class="mini" id="csv">Exportar planilha</button></div>
@@ -356,6 +385,8 @@ const COR={trabalho:"k-trabalho",mov:"k-corpo",pilates:"k-corpo",treino:"k-corpo
 
 const HUMOR=["Péssimo","Baixo","Ok","Bem","Ótimo"];
 const MENS=["Não","Leve","Médio","Intenso"];
+const ENERGIA=["Exausta","Cansada","Ok","Disposta","Cheia de energia"];
+const FOME=["Pouca","Normal","Muita"];
 const TIPOS=["Pendência","Meta","Objetivo","Planejar","Ideia"];
 const DIAS=["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
 const MESES=["jan","fev","mar","abr","mai","jun","jul","ago","set","out","nov","dez"];
@@ -406,15 +437,20 @@ function renderHoje(fromSnapshot){
   const focused=$("log").contains(document.activeElement);
   if(fromSnapshot&&focused) return;
   const set=(id,v)=>{const el=$(id); if(el!==document.activeElement) el.value=v??""};
-  set("f-peso",data.peso); set("f-sono",data.sono); set("f-leitura",data.leitura); set("f-treino",data.treino); set("f-nota",data.nota); set("f-simulado",data.simulado);
+  set("f-peso",data.peso); set("f-sono",data.sono); set("f-leitura",data.leitura); set("l-pag",data.pagina); set("l-com",data.comentario); set("f-treino",data.treino); set("f-nota",data.nota); set("f-simulado",data.simulado);
   $("f-humor").innerHTML=HUMOR.map((h,i)=>`<button class="chip" data-v="${i+1}" aria-pressed="${data.humor===i+1}">${h}</button>`).join("");
+  $("f-energia").innerHTML=ENERGIA.map((h,i)=>`<button class="chip" data-v="${i+1}" aria-pressed="${data.energia===i+1}">${h}</button>`).join("");
+  $("f-fome").innerHTML=FOME.map((h,i)=>`<button class="chip" data-v="${i+1}" aria-pressed="${data.fome===i+1}">${h}</button>`).join("");
   $("f-mens").innerHTML=MENS.map(m=>`<button class="chip" data-v="${m}" aria-pressed="${(data.menstruacao||"")===m}">${m}</button>`).join("");
   const g=data.gastos||[];
-  $("g-list").innerHTML=g.map((x,i)=>`<li><span>${esc(x.desc||"Sem descrição")}${x.docinho?" · docinho":""}</span><span>${eur(x.valor)} <button data-i="${i}" aria-label="Remover gasto">remover</button></span></li>`).join("")+(g.length?`<li><b>Total</b><b>${eur(g.reduce((a,x)=>a+x.valor,0))}</b></li>`:"");
+  const ent=g.filter(x=>x.entrada).reduce((a,x)=>a+x.valor,0), sai=g.filter(x=>!x.entrada).reduce((a,x)=>a+x.valor,0);
+  $("g-list").innerHTML=g.map((x,i)=>`<li><span>${esc(x.desc||(x.entrada?"Entrada":"Sem descrição"))}${x.docinho?" · docinho":""}</span><span class="${x.entrada?"ent":""}">${x.entrada?"+ ":"− "}${eur(x.valor)} <button data-i="${i}" aria-label="Remover">remover</button></span></li>`).join("")+(g.length?`${ent?`<li><span>Entradas</span><span class="ent">+ ${eur(ent)}</span></li>`:""}<li><span>Saídas</span><span>− ${eur(sai)}</span></li><li><b>Saldo do dia</b><b class="${ent-sai>=0?"ent":""}">${ent-sai>=0?"+ ":"− "}${eur(Math.abs(ent-sai))}</b></li>`:"");
   renderMeals();
   renderAgua();
   renderHoro();
   renderSentir();
+  renderLivro();
+  renderMetaKcal();
 }
 const FOODS=[
 ["arroz-b","Arroz branco, cozido",128,"TACO","1 colher de servir",45],
@@ -510,6 +546,7 @@ function findFood(id){return allFoods().find(f=>f[0]===id)}
 function searchFoods(q){q=norm(q).trim(); const A=allFoods(); if(!q)return A.slice(0,6);
   const w=q.split(/\s+/); return A.map(f=>{const n=norm(f[1]);let sc=0;w.forEach(x=>{if(n.includes(x))sc+=n.startsWith(x)?3:2});return [sc,f]}).filter(x=>x[0]>0).sort((a,b)=>b[0]-a[0]).slice(0,7).map(x=>x[1])}
 function renderMeals(){
+  setTimeout(renderMetaKcal,0);
   const d=state.days[state.day]||{}, r=d.refeicoes||{};
   $("k-dia").textContent=dayKcal(d).toLocaleString("pt-BR")+" kcal";
   const focusId=document.activeElement&&document.activeElement.id;
@@ -568,6 +605,93 @@ function cicloInfo(diaId){
   let fase; if(dia<=5)fase="menstrual"; else if(dia<ov-1)fase="folicular"; else if(dia<=ov+1)fase="ovulatória"; else if(dia>=dur-5)fase="pré-menstrual"; else fase="lútea";
   return {dia,dur,fase,proxima:Math.max(0,dur-dia+1)};
 }
+const FASES=["menstrual","folicular","ovulatória","lútea","pré-menstrual"];
+const MET=[
+ {k:"humor",nome:"Humor",lim:.5,sobe:"humor melhor",desce:"humor mais baixo",fmt:v=>v.toFixed(1)},
+ {k:"energia",nome:"Energia",lim:.5,sobe:"mais energia",desce:"mais cansaço",fmt:v=>v.toFixed(1)},
+ {k:"fome",nome:"Fome",lim:.35,sobe:"mais fome",desce:"menos fome",fmt:v=>v.toFixed(1)},
+ {k:"sono",nome:"Sono",lim:.5,sobe:"dorme mais",desce:"dorme menos",fmt:v=>v.toFixed(1)+"h"},
+ {k:"kcal",nome:"Kcal",rel:.1,sobe:"come mais",desce:"come menos",fmt:v=>Math.round(v).toLocaleString("pt-BR")},
+ {k:"doces",nome:"Docinhos",abs:1,rel:.5,sobe:"gasta mais com docinho",desce:"gasta menos com docinho",fmt:v=>eur(v)}];
+function valores(x){const g=x.gastos||[];return {humor:x.humor||null,energia:x.energia||null,fome:x.fome||null,sono:x.sono!=null&&x.sono!==""?+x.sono:null,kcal:dayKcal(x)||null,doces:g.length||x.humor||x.energia?g.filter(y=>y.docinho).reduce((a,y)=>a+y.valor,0):null}}
+let padCache=null,padKey="";
+function padroes(){
+  const key=JSON.stringify(state.days).length+":"+Object.keys(state.days).length; if(padKey===key&&padCache)return padCache;
+  const geral={},fase={},sem={};
+  Object.keys(state.days).forEach(id=>{const x=state.days[id],v=valores(x),c=cicloInfo(id),dw=parse(id).getDay();
+    MET.forEach(m=>{const val=v[m.k]; if(val==null)return;
+      (geral[m.k]=geral[m.k]||[]).push(val);
+      if(c&&FASES.includes(c.fase)){fase[c.fase]=fase[c.fase]||{};(fase[c.fase][m.k]=fase[c.fase][m.k]||[]).push(val)}
+      if(m.k==="energia"){(sem[dw]=sem[dw]||[]).push(val)}})});
+  const media=k=>avg(geral[k]||[]);
+  const res={};
+  FASES.forEach(f=>{res[f]={};MET.forEach(m=>{const a=(fase[f]||{})[m.k]||[];if(a.length<3||(geral[m.k]||[]).length<7){res[f][m.k]=null;return}
+    const v=avg(a),g=media(m.k),dif=v-g; let dir=0;
+    if(m.lim!=null&&Math.abs(dif)>=m.lim)dir=Math.sign(dif);
+    if(m.rel!=null&&g>0&&Math.abs(dif)/g>=m.rel&&(m.abs==null||Math.abs(dif)>=m.abs))dir=Math.sign(dif);
+    res[f][m.k]={v,n:a.length,dir}})});
+  let pior=null; Object.entries(sem).forEach(([d,a])=>{if(a.length>=3){const v=avg(a);if(!pior||v<pior.v)pior={d:+d,v}}});
+  if(pior&&(!media("energia")||media("energia")-pior.v<.4))pior=null;
+  padCache={res,pior,ciclos:Object.keys(state.days).filter(id=>{const m=(state.days[id]||{}).menstruacao,pm=(state.days[ymd(addDays(parse(id),-1))]||{}).menstruacao;return m&&m!=="Não"&&!(pm&&pm!=="Não")}).length};padKey=key;
+  return padCache;
+}
+function frasesFase(f){const r=padroes().res[f];if(!r)return [];return MET.filter(m=>r[m.k]&&r[m.k].dir).map(m=>r[m.k].dir>0?m.sobe:m.desce)}
+function renderPadroes(){
+  const P=padroes(), hoje=cicloInfo(ymd(new Date()));
+  const algum=FASES.some(f=>MET.some(m=>P.res[f][m.k]));
+  const linhas=FASES.map(f=>{const fr=frasesFase(f);return fr.length?`<li><b>${f[0].toUpperCase()+f.slice(1)}:</b> você costuma ter ${fr.join(", ")}.</li>`:""}).join("");
+  const cel=(f,m)=>{const x=P.res[f][m.k];if(!x)return '<td class="na">·</td>';return `<td class="${x.dir>0?"up":x.dir<0?"down":""}">${x.dir>0?"↑ ":x.dir<0?"↓ ":""}${m.fmt(x.v)}</td>`};
+  $("padroes").innerHTML=`<span class="fase">${hoje&&FASES.includes(hoje.fase)?"Hoje: dia "+hoje.dia+" · fase "+hoje.fase:"Ciclo"}</span>
+  <p>${P.ciclos?`${P.ciclos} ${P.ciclos===1?"menstruação registrada":"menstruações registradas"}${hoje&&hoje.dur?` · ciclo médio de ${hoje.dur} dias`:""}.`:"Nenhuma menstruação registrada ainda."}</p>
+  ${linhas?`<ul class="dicas">${linhas}</ul>`:`<p>${algum?"Por enquanto nenhuma fase se destaca da sua média.":"Ainda faltam dados. Registre humor, energia, fome e sono todo dia, e marque a menstruação quando vier. Depois de um ciclo completo (uns 30 dias) o app começa a mostrar os seus padrões."}</p>`}
+  ${P.pior?`<p><b>Dia da semana mais cansativo:</b> ${DIAS[P.pior.d].toLowerCase()}.</p>`:""}
+  ${algum?`<div class="ptab"><table><thead><tr><th>Fase</th>${MET.map(m=>`<th>${m.nome}</th>`).join("")}</tr></thead><tbody>${FASES.map(f=>`<tr class="${hoje&&hoje.fase===f?"atual":""}"><td>${f}</td>${MET.map(m=>cel(f,m)).join("")}</tr>`).join("")}</tbody></table></div><p class="nota">↑ e ↓ marcam onde a fase foge da sua média. Humor e energia vão de 1 a 5; fome de 1 a 3. Cada valor precisa de pelo menos 3 dias registrados naquela fase.</p>`:""}`;
+}
+/* ---------- leitura ---------- */
+function leu(x){return !!(x&&(+x.leitura>0||x.lido||(x.pagina!=null&&x.pagina!=="")||(x.comentario&&x.comentario.trim())))}
+function paginaAnterior(id){const ks=Object.keys(state.days).filter(k=>k<id&&state.days[k].pagina!=null&&state.days[k].pagina!==""&&state.days[k].livro===(state.perfil.livro||{}).id).sort();return ks.length?+state.days[ks[ks.length-1]].pagina:(state.perfil.livro||{}).inicio||0}
+function renderLivro(){
+  const L=state.perfil.livro, x=state.days[state.day]||{};
+  $("l-check").setAttribute("aria-pressed",!!x.lido);
+  if(!L){$("l-livro").innerHTML=`<div class="livro"><small>Qual livro você está lendo?</small><div class="row" style="display:flex;gap:6px;flex-wrap:wrap"><button class="mini" id="l-novo">Escolher livro</button></div></div>`;$("l-novo").onclick=novoLivro;return}
+  const pag=x.pagina!=null&&x.pagina!==""?+x.pagina:null, ant=paginaAnterior(state.day), atual=pag??ant;
+  const pct=L.paginas?Math.min(100,Math.round(atual/L.paginas*100)):null;
+  $("l-livro").innerHTML=`<div class="livro"><b>${esc(L.titulo)}</b><small>${pag!=null&&pag>ant?`+${pag-ant} páginas hoje · `:""}página ${atual}${L.paginas?` de ${L.paginas} · ${pct}%`:""}</small>${pct!=null?`<div class="bar"><i style="width:${pct}%"></i></div>`:""}<div style="display:flex;gap:6px;flex-wrap:wrap"><button class="mini" id="l-fim">Terminei o livro</button><button class="mini" id="l-troca">Trocar livro</button></div></div>`;
+  $("l-fim").onclick=()=>{(state.perfil.lidos=state.perfil.lidos||[]).push({titulo:L.titulo,fim:ymd(new Date())});state.perfil.livro=null;queue("config","perfil",100);renderLivro();toast("Parabéns! “"+L.titulo+"” foi para a lista de lidos.")};
+  $("l-troca").onclick=novoLivro;
+}
+function novoLivro(){
+  const L=state.perfil.livro||{};
+  openModal("Meu livro",`<label class="lbl" for="b-t">Título</label><input id="b-t" type="text" value="${esc(L.titulo||"")}"><label class="lbl" for="b-p">Total de páginas (opcional)</label><input id="b-p" type="number" inputmode="numeric" value="${L.paginas||""}"><label class="lbl" for="b-i">Estou na página</label><input id="b-i" type="number" inputmode="numeric" value="${L.inicio||0}"><div class="row"><button class="btn" id="b-ok">Salvar</button><button class="btn ghost" data-close>Cancelar</button></div>`);
+  $("b-ok").onclick=()=>{const t=$("b-t").value.trim();if(!t){toast("Escreva o título.");return}
+    state.perfil.livro={id:L.titulo===t&&L.id?L.id:"b"+Date.now().toString(36),titulo:t,paginas:parseInt($("b-p").value)||null,inicio:parseInt($("b-i").value)||0};
+    queue("config","perfil",100);closeModal();renderLivro()};
+}
+$("l-check").onclick=()=>{const d=dayData(state.day);d.lido=!d.lido;if(!d.lido)delete d.lido;queue("days",state.day,200);renderLivro()};
+$("l-pag").addEventListener("input",()=>{const d=dayData(state.day);if(state.perfil.livro)d.livro=state.perfil.livro.id});
+
+/* ---------- meta de calorias ---------- */
+function ultimoPeso(){const ks=Object.keys(state.days).filter(k=>state.days[k].peso).sort();return ks.length?+state.days[ks[ks.length-1]].peso:null}
+function metaKcal(){
+  const P=state.perfil; if(P.metaKcal)return {meta:+P.metaKcal,manual:true};
+  const w=ultimoPeso(); if(!w)return null;
+  const nasc=new Date(2002,5,22), hoje=new Date(); let idade=hoje.getFullYear()-nasc.getFullYear(); if(hoje<new Date(hoje.getFullYear(),5,22))idade--;
+  const alt=(P.altura||1.63)*100, tmb=10*w+6.25*alt-5*idade-161, gasto=tmb*1.45;
+  const meta=Math.max(1400,Math.round((gasto-400)/50)*50);
+  return {meta,tmb:Math.round(tmb),gasto:Math.round(gasto),peso:w,idade,manual:false};
+}
+function renderMetaKcal(){
+  const box=$("meta-k"); if(!box)return; const M=metaKcal(), x=state.days[state.day]||{}, k=dayKcal(x);
+  if(!M){box.innerHTML=`<small>Registre seu peso para o app calcular a sua meta de calorias.</small>`;return}
+  const pct=Math.round(k/M.meta*100), resta=M.meta-k;
+  box.innerHTML=`<div class="bar"><i class="${k>M.meta?"over":""}" style="width:${Math.min(100,pct)}%"></i></div><small>${k.toLocaleString("pt-BR")} de ${M.meta.toLocaleString("pt-BR")} kcal · ${resta>=0?"faltam "+resta.toLocaleString("pt-BR"):"passou "+(-resta).toLocaleString("pt-BR")} <button class="linkbtn" id="mk-info">${M.manual?"meta manual":"como calculei"}</button></small>`;
+  $("mk-info").onclick=infoMeta;
+}
+function infoMeta(){
+  const M=metaKcal()||{};
+  openModal("Meta de calorias",`${M.manual?`<p>Você definiu a meta manualmente.</p>`:`<p>Com o seu último peso (<b>${String(M.peso).replace(".",",")} kg</b>), altura 1,63 m e ${M.idade} anos:</p><ul class="dicas"><li>Seu corpo gasta em repouso cerca de <b>${M.tmb} kcal</b> (fórmula de Mifflin-St Jeor).</li><li>Com a sua rotina de pilates, treino e caminhada, o gasto do dia fica perto de <b>${M.gasto} kcal</b>.</li><li>Tirando cerca de 400 kcal, a meta é <b>${M.meta} kcal</b>. Isso dá uma perda de uns 300 a 400 g por semana, sem passar fome.</li></ul><p class="nota">A meta se atualiza sozinha quando o seu peso muda. Nunca fica abaixo de 1.400 kcal. É uma estimativa: um nutricionista pode ajustar para você.</p>`}<label class="lbl" for="mk-v">Meta manual (deixe vazio para automática)</label><input id="mk-v" type="number" inputmode="numeric" value="${state.perfil.metaKcal||""}"><div class="row"><button class="btn" id="mk-ok">Salvar</button><button class="btn ghost" data-close>Fechar</button></div>`);
+  $("mk-ok").onclick=()=>{const v=parseInt($("mk-v").value);if(v>0)state.perfil.metaKcal=v;else delete state.perfil.metaKcal;queue("config","perfil",100);closeModal();renderMetaKcal()};
+}
 function renderSentir(){
   const id=state.day, d=parse(id), x=state.days[id]||{}, ontem=state.days[ymd(addDays(d,-1))]||{};
   let pts=0; const dicas=[];
@@ -591,6 +715,10 @@ function renderSentir(){
     if(c.fase==="folicular"){pts++;dicas.push("Fase folicular: costuma ser boa para começar coisas novas e estudar conteúdo difícil.")}
     if(c.fase==="ovulatória"){pts++;dicas.push("Perto da ovulação a energia e a vontade de conversar costumam estar em alta. Bom dia para reuniões e treino mais forte.")}
     if(c.fase==="pré-menstrual"){pts--;dicas.push(`Fase pré-menstrual (${c.proxima<=1?"a menstruação deve vir hoje ou amanhã":"menstruação em cerca de "+c.proxima+" dias"}): a vontade de doce costuma aumentar. Deixe uma fruta à mão antes de passar na padaria.`)}}
+  if(c&&FASES.includes(c.fase)){const r=padroes().res[c.fase]; const fr=frasesFase(c.fase);
+    if(fr.length){dicas.unshift(`Pelos seus registros, na fase ${c.fase} você costuma ter ${fr.join(", ")}.`);
+      ["energia","humor"].forEach(k=>{if(r[k]&&r[k].dir)pts+=r[k].dir})}}
+  {const P=padroes(); if(P.pior&&P.pior.d===d.getDay()){pts--;dicas.push(`${DIAS[d.getDay()]} costuma ser o seu dia mais cansativo. Planeje algo leve para a noite.`)}}
   const nivel=pts>=2?"Boa":pts<=-2?"Baixa":"Média";
   const frase={Boa:"Tudo indica um dia com boa energia.",Média:"Um dia de energia equilibrada: vá no seu ritmo.",Baixa:"Tudo indica um dia de energia mais baixa. Seja gentil com você."}[nivel];
   const horo=CANCER[Math.floor((d-new Date(d.getFullYear(),0,1))/864e5)%CANCER.length];
@@ -607,7 +735,7 @@ function renderHoro(){
 
 /* ---------- SEMANA ---------- */
 function weekStats(startId){
-  const start=parse(startId); let s={trab:0,pilates:0,movDias:0,auto:0,ingles:0,casa:0,cuid:0,sono8:0,pesos:[],gastos:0,humor:[],treinos:0,kcal:[],agua8:0,doces:0,docesEur:0,leitura:0,leituraDias:0};
+  const start=parse(startId); let s={trab:0,pilates:0,movDias:0,auto:0,ingles:0,casa:0,cuid:0,sono8:0,pesos:[],gastos:0,entradas:0,humor:[],treinos:0,kcal:[],agua8:0,doces:0,docesEur:0,leitura:0,leituraDias:0};
   for(let i=0;i<7;i++){
     const d=addDays(start,i), id=ymd(d), data=state.days[id]||{}, ch=data.checks||{}; let mov=false;
     ROTINA[d.getDay()].forEach(b=>{ if(!ch[b[0]])return; const m=mins(b[1])-mins(b[0]);
@@ -616,8 +744,8 @@ function weekStats(startId){
     if(mov)s.movDias++;
     if(+data.sono>=8)s.sono8++;
     if(data.peso)s.pesos.push(+data.peso);
-    (data.gastos||[]).forEach(g=>{s.gastos+=g.valor; if(g.docinho){s.doces++;s.docesEur+=g.valor}});
-    if(+data.leitura>0){s.leitura+=+data.leitura;s.leituraDias++}
+    (data.gastos||[]).forEach(g=>{if(g.entrada){s.entradas+=g.valor;return} s.gastos+=g.valor; if(g.docinho){s.doces++;s.docesEur+=g.valor}});
+    if(+data.leitura>0)s.leitura+=+data.leitura; if(leu(data))s.leituraDias++;
     if(data.humor)s.humor.push(data.humor);
     {const k=dayKcal(data); if(k>0)s.kcal.push(k);} if((data.agua||0)>=8)s.agua8++;
     if(data.treino&&data.treino.trim())s.treinos++;
@@ -640,7 +768,7 @@ function renderPatente(){
 function weekRows(startId){
   const st=parse(startId);
   return Array.from({length:7},(_,i)=>{const d=addDays(st,i),id=ymd(d),x=state.days[id]||{},g=(x.gastos||[]);
-    return {d,id,sono:x.sono!=null&&x.sono!==""?+x.sono:null,peso:x.peso?+x.peso:null,gastos:g.reduce((a,y)=>a+y.valor,0),doces:g.filter(y=>y.docinho).reduce((a,y)=>a+y.valor,0),leitura:+x.leitura||0,agua:x.agua||0,kcal:dayKcal(x)}});
+    return {d,id,sono:x.sono!=null&&x.sono!==""?+x.sono:null,peso:x.peso?+x.peso:null,gastos:g.filter(y=>!y.entrada).reduce((a,y)=>a+y.valor,0),entradas:g.filter(y=>y.entrada).reduce((a,y)=>a+y.valor,0),doces:g.filter(y=>y.docinho).reduce((a,y)=>a+y.valor,0),leitura:+x.leitura||0,leu:leu(x),agua:x.agua||0,kcal:dayKcal(x)}});
 }
 function leituraSugestao(){
   const st=parse(state.week); let mins=0,dias=0;
@@ -655,22 +783,23 @@ function leituraSugestao(){
 function renderPlanilha(){
   const R=weekRows(state.week), hojeId=ymd(new Date()), f1=v=>v==null?"—":v.toFixed(1).replace(".",","), e=v=>v?eur(v):"—";
   const sonos=R.filter(r=>r.sono!=null).map(r=>r.sono), pesos=R.filter(r=>r.peso).map(r=>r.peso), kc=R.filter(r=>r.kcal>0).map(r=>r.kcal);
-  const meta=leituraSugestao().meta;
-  $("planilha").innerHTML=`<table><thead><tr><th>Dia</th><th>Sono</th><th>Peso</th><th>Gastos</th><th>Docinhos</th><th>Leitura</th><th>Água</th><th>Kcal</th></tr></thead><tbody>${R.map(r=>`<tr class="${r.id===hojeId?"hoje":""}"><td>${DIAS[r.d.getDay()].slice(0,3)} ${r.d.getDate()}</td><td class="${r.sono==null?"vazio":r.sono>=8?"bom":r.sono<6.5?"alerta":""}">${r.sono==null?"—":f1(r.sono)+"h"}</td><td class="${r.peso?"":"vazio"}">${r.peso?f1(r.peso):"—"}</td><td class="${r.gastos?"":"vazio"}">${e(r.gastos)}</td><td class="${r.doces?"alerta":"vazio"}">${e(r.doces)}</td><td class="${!r.leitura?"vazio":r.leitura>=meta?"bom":""}">${r.leitura?r.leitura+" min":"—"}</td><td class="${!r.agua?"vazio":r.agua>=8?"bom":""}">${r.agua?r.agua+"/8":"—"}</td><td class="${r.kcal?"":"vazio"}">${r.kcal?r.kcal.toLocaleString("pt-BR"):"—"}</td></tr>`).join("")}</tbody>
-  <tfoot><tr><td>Semana</td><td>${sonos.length?"média "+f1(avg(sonos))+"h":"—"}</td><td>${pesos.length?"média "+f1(avg(pesos)):"—"}</td><td>${eur(R.reduce((a,r)=>a+r.gastos,0))}</td><td>${eur(R.reduce((a,r)=>a+r.doces,0))}</td><td>${R.reduce((a,r)=>a+r.leitura,0)} min</td><td>${R.reduce((a,r)=>a+r.agua,0)} copos</td><td>${kc.length?"média "+Math.round(avg(kc)).toLocaleString("pt-BR"):"—"}</td></tr></tfoot></table>`;
+  const meta=leituraSugestao().meta, mk=(metaKcal()||{}).meta;
+  $("planilha").innerHTML=`<table><thead><tr><th>Dia</th><th>Sono</th><th>Peso</th><th>Entradas</th><th>Gastos</th><th>Docinhos</th><th>Leitura</th><th>Água</th><th>Kcal</th></tr></thead><tbody>${R.map(r=>`<tr class="${r.id===hojeId?"hoje":""}"><td>${DIAS[r.d.getDay()].slice(0,3)} ${r.d.getDate()}</td><td class="${r.sono==null?"vazio":r.sono>=8?"bom":r.sono<6.5?"alerta":""}">${r.sono==null?"—":f1(r.sono)+"h"}</td><td class="${r.peso?"":"vazio"}">${r.peso?f1(r.peso):"—"}</td><td class="${r.entradas?"bom":"vazio"}">${e(r.entradas)}</td><td class="${r.gastos?"":"vazio"}">${e(r.gastos)}</td><td class="${r.doces?"alerta":"vazio"}">${e(r.doces)}</td><td class="${!r.leu?"vazio":r.leitura>=meta?"bom":""}">${r.leitura?r.leitura+" min":r.leu?"✓":"—"}</td><td class="${!r.agua?"vazio":r.agua>=8?"bom":""}">${r.agua?r.agua+"/8":"—"}</td><td class="${!r.kcal?"vazio":mk&&r.kcal>mk?"alerta":mk?"bom":""}">${r.kcal?r.kcal.toLocaleString("pt-BR"):"—"}</td></tr>`).join("")}</tbody>
+  <tfoot><tr><td>Semana</td><td>${sonos.length?"média "+f1(avg(sonos))+"h":"—"}</td><td>${pesos.length?"média "+f1(avg(pesos)):"—"}</td><td>${eur(R.reduce((a,r)=>a+r.entradas,0))}</td><td>${eur(R.reduce((a,r)=>a+r.gastos,0))}</td><td>${eur(R.reduce((a,r)=>a+r.doces,0))}</td><td>${R.reduce((a,r)=>a+r.leitura,0)} min</td><td>${R.reduce((a,r)=>a+r.agua,0)} copos</td><td>${kc.length?"média "+Math.round(avg(kc)).toLocaleString("pt-BR"):"—"}</td></tr></tfoot></table>`;
   const L=leituraSugestao(), lidos=R.reduce((a,r)=>a+r.leitura,0);
   $("leitura-meta").innerHTML=`<span class="fase">Esta semana</span><div><span class="big">${L.meta}</span> min por dia</div><p>${L.txt}</p><p><b>Progresso:</b> ${lidos} de ${L.semana} min na semana.</p><div class="bar"><i style="width:${Math.min(100,Math.round(lidos/L.semana*100))}%"></i></div>`;
 }
 function exportCSV(){
   const R=weekRows(state.week), n=v=>v==null?"":String(v).replace(".",",");
-  const linhas=[["Data","Dia","Sono (h)","Peso (kg)","Gastos (€)","Docinhos (€)","Leitura (min)","Água (copos)","Calorias (kcal)"].join(";")]
-    .concat(R.map(r=>[r.id,DIAS[r.d.getDay()],n(r.sono),n(r.peso),n(r.gastos.toFixed(2)),n(r.doces.toFixed(2)),r.leitura,r.agua,r.kcal].join(";")));
+  const linhas=[["Data","Dia","Sono (h)","Peso (kg)","Entradas (€)","Gastos (€)","Docinhos (€)","Leitura (min)","Água (copos)","Calorias (kcal)"].join(";")]
+    .concat(R.map(r=>[r.id,DIAS[r.d.getDay()],n(r.sono),n(r.peso),n(r.entradas.toFixed(2)),n(r.gastos.toFixed(2)),n(r.doces.toFixed(2)),r.leitura,r.agua,r.kcal].join(";")));
   const blob=new Blob(["\ufeff"+linhas.join("\n")],{type:"text/csv"}), nome=`semana-${state.week}.csv`, file=new File([blob],nome,{type:"text/csv"});
   (async()=>{try{if(navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"Planilha da semana"});return}}catch(e){if(e&&e.name==="AbortError")return}
     const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=nome;document.body.appendChild(a);a.click();a.remove();toast("Planilha salva em Downloads.")})();
 }
 function renderSemana(){
   renderPatente();
+  renderPadroes();
   renderPlanilha();
   const st=parse(state.week), en=addDays(st,6);
   $("w-title").innerHTML="Semana<small>"+st.getDate()+" "+MESES[st.getMonth()]+" – "+en.getDate()+" "+MESES[en.getMonth()]+"</small>";
@@ -695,12 +824,12 @@ function renderSemana(){
   let diff=""; if(pa!=null&&pp!=null){const dd=pa-pp; diff=(dd>0?"+":"")+dd.toFixed(1).replace(".",",")+" kg vs semana anterior"}
   $("resumo").innerHTML=[
     ["Peso médio",pa!=null?pa.toFixed(1).replace(".",",")+" kg":"—",diff||(s.pesos.length?s.pesos.length+" registros":"sem registros")],
-    ["Gastos",eur(s.gastos),"soma da semana"],
+    ["Dinheiro",(s.entradas-s.gastos>=0?"+ ":"− ")+eur(Math.abs(s.entradas-s.gastos)),"entrou "+eur(s.entradas)+" · saiu "+eur(s.gastos)],
     ["Humor médio",ha!=null?HUMOR[Math.round(ha)-1]:"—",s.humor.length?s.humor.length+" dias registrados":"sem registros"],
     ["Treinos anotados",String(s.treinos),"dias com nota de treino"],
     ["Calorias por dia",s.kcal.length?"≈ "+Math.round(avg(s.kcal)).toLocaleString("pt-BR"):"—",s.kcal.length?"média de "+s.kcal.length+" dias somados":"nenhum dia somado"],
     ["Docinhos",String(s.doces),s.doces?eur(s.docesEur)+" na semana":"nenhum comprado"],
-    ["Leitura",s.leitura+" min",s.leituraDias+" dias lendo"]
+    ["Leitura",s.leituraDias+" dias",s.leitura?s.leitura+" min anotados":"dias com leitura"]
   ].map(r=>`<div class="field card"><span class="lbl">${r[0]}</span><b>${r[1]}</b><small>${r[2]}</small></div>`).join("");
   renderChart();
 }
@@ -760,11 +889,15 @@ $("agenda").addEventListener("click",e=>{
 });
 const bindText=(id,field,num)=>$(id).addEventListener("input",e=>{const d=dayData(state.day); const v=e.target.value;
   if(v==="") delete d[field]; else d[field]=num?parseFloat(v):v; queue("days",state.day,800)});
-bindText("f-peso","peso",true); bindText("f-sono","sono",true); bindText("f-leitura","leitura",true); bindText("f-treino","treino"); bindText("f-nota","nota"); bindText("f-simulado","simulado",true);
+bindText("f-peso","peso",true); $("f-peso").addEventListener("input",()=>setTimeout(renderMetaKcal,0)); bindText("f-sono","sono",true); bindText("f-leitura","leitura",true); bindText("l-pag","pagina",true); bindText("l-com","comentario"); $("l-pag").addEventListener("input",()=>setTimeout(renderLivro,0)); bindText("f-treino","treino"); bindText("f-nota","nota"); bindText("f-simulado","simulado",true);
 $("f-humor").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=dayData(state.day),v=+b.dataset.v; if(d.humor===v)delete d.humor; else d.humor=v; queue("days",state.day,300); renderHoje()});
+["energia","fome"].forEach(k=>$("f-"+k).addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=dayData(state.day),v=+b.dataset.v; if(d[k]===v)delete d[k]; else d[k]=v; queue("days",state.day,300); renderHoje()}));
 $("f-mens").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;const d=dayData(state.day),v=b.dataset.v; if(d.menstruacao===v)delete d.menstruacao; else d.menstruacao=v; queue("days",state.day,300); renderHoje()});
 function addGasto(){const v=parseFloat($("g-valor").value); if(!(v>0)){toast("Digite um valor maior que zero.");return}
-  dayData(state.day).gastos.push({valor:Math.round(v*100)/100,desc:$("g-desc").value.trim(),docinho:$("g-doce").getAttribute("aria-pressed")==="true"}); $("g-doce").setAttribute("aria-pressed","false"); $("g-valor").value="";$("g-desc").value=""; queue("days",state.day,200); renderHoje()}
+  const isE=$("g-entrada").getAttribute("aria-pressed")==="true";
+  dayData(state.day).gastos.push(isE?{valor:Math.round(v*100)/100,desc:$("g-desc").value.trim(),entrada:true}:{valor:Math.round(v*100)/100,desc:$("g-desc").value.trim(),docinho:$("g-doce").getAttribute("aria-pressed")==="true"}); $("g-doce").setAttribute("aria-pressed","false"); $("g-valor").value="";$("g-desc").value=""; queue("days",state.day,200); renderHoje()}
+function tipoDin(e){$("g-entrada").setAttribute("aria-pressed",e);$("g-saida").setAttribute("aria-pressed",!e);$("g-doce-row").hidden=e;$("g-desc").placeholder=e?"De onde veio?":"Com o quê?"}
+$("g-saida").onclick=()=>tipoDin(false); $("g-entrada").onclick=()=>tipoDin(true);
 $("g-add").onclick=addGasto; $("g-doce").onclick=e=>{const b=e.currentTarget;b.setAttribute("aria-pressed",b.getAttribute("aria-pressed")!=="true")}; $("g-desc").addEventListener("keydown",e=>{if(e.key==="Enter")addGasto()});
 $("g-list").addEventListener("click",e=>{const b=e.target.closest("button[data-i]");if(!b)return; dayData(state.day).gastos.splice(+b.dataset.i,1); queue("days",state.day,200); renderHoje()});
 
@@ -784,7 +917,7 @@ $("meals").addEventListener("input",e=>{
   const t=e.target, box=t.closest(".meal"); if(!box)return; const m=box.dataset.m;
   if(t.id==="busca-"+m){state.busca=t.value;renderMeals();return}
   if(t.dataset.ix!==undefined){const d=dayData(state.day);const it=d.refeicoes[m][+t.dataset.ix];it.g=Math.max(0,parseFloat(t.value)||0);queue("days",state.day,800);
-    const kc=t.parentElement.querySelector(".kc");kc.textContent=itemK(it)+" kcal";box.querySelector(".mk").textContent=mealK(d,m)+" kcal";$("k-dia").textContent=dayKcal(d).toLocaleString("pt-BR")+" kcal"}
+    const kc=t.parentElement.querySelector(".kc");kc.textContent=itemK(it)+" kcal";box.querySelector(".mk").textContent=mealK(d,m)+" kcal";$("k-dia").textContent=dayKcal(d).toLocaleString("pt-BR")+" kcal";renderMetaKcal()}
 });
 $("a-mais").onclick=()=>{const d=dayData(state.day);d.agua=Math.min(20,(d.agua||0)+1);queue("days",state.day,400);renderAgua()};
 $("a-menos").onclick=()=>{const d=dayData(state.day);d.agua=Math.max(0,(d.agua||0)-1);queue("days",state.day,400);renderAgua()};
